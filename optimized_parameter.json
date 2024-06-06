@@ -1,0 +1,127 @@
+{
+    "trolley_mass": {
+        "value": 2.8237225845702527,
+        "unit": "kg",
+        "description": "Mass of the trolley",
+        "measured": false,
+        "steps": 7.771561172376096e-08
+    },
+    "container_mass": {
+        "value": 1.128,
+        "unit": "kg",
+        "description": "Mass of the container",
+        "measured": true
+    },
+    "trolley_damping_coefficient": {
+        "value": 2.1446123570273428,
+        "unit": "Ns/m",
+        "description": "Damping coefficient of the trolley",
+        "measured": false,
+        "steps": 3.108624468950438e-08
+    },
+    "cable_damping_coefficient": {
+        "value": 5.9410619526340644,
+        "unit": "Ns/m",
+        "description": "Damping coefficient of the cable",
+        "measured": false,
+        "steps": -4.440892098500626e-08
+    },
+    "gravity_acceleration": {
+        "value": 9.81,
+        "unit": "m/s^2",
+        "description": "Acceleration due to gravity",
+        "measured": true
+    },
+    "trolley_motor_inductance": {
+        "value": 0.0001048,
+        "unit": "H",
+        "description": "Inductance of the trolley motor",
+        "measured": true
+    },
+    "trolley_motor_resistance": {
+        "value": 0.39,
+        "unit": "ohm",
+        "description": "Resistance of the trolley motor",
+        "measured": true
+    },
+    "trolley_motor_rotator_inertia": {
+        "value": 0.0003700692170439165,
+        "unit": "kg.m^2",
+        "description": "Rotational inertia of the trolley motor rotor",
+        "measured": false,
+        "steps": 3.1052937998765633e-09
+    },
+    "trolley_motor_damping_coefficient": {
+        "value": 8.317081353382767,
+        "unit": "Ns.m/rad",
+        "description": "Damping coefficient of the trolley motor",
+        "measured": false,
+        "steps": 0.00017199019985980613
+    },
+    "trolley_motor_pulley_radius": {
+        "value": 0.015,
+        "unit": "m",
+        "description": "Radius of the pulley connected to the trolley motor",
+        "measured": true
+    },
+    "trolley_motor_torque_constant": {
+        "value": 0.9035877060997586,
+        "unit": "Nm/A",
+        "description": "Torque constant of the trolley motor",
+        "measured": false,
+        "steps": -0.00014205725484828235
+    },
+    "trolley_motor_back_emf_constant": {
+        "value": 0.04266008061787298,
+        "unit": "V/(rad/s)",
+        "description": "Back EMF constant of the trolley motor",
+        "measured": false,
+        "steps": 4.384914653599026e-06
+    },
+    "hoist_motor_inductance": {
+        "value": 0.0073,
+        "unit": "H",
+        "description": "Inductance of the hoist motor",
+        "measured": true
+    },
+    "hoist_motor_resistance": {
+        "value": 9.5,
+        "unit": "ohm",
+        "description": "Resistance of the hoist motor",
+        "measured": true
+    },
+    "hoist_motor_rotator_inertia": {
+        "value": 1.8001796735977577e-05,
+        "unit": "kg.m^2",
+        "description": "Rotational inertia of the hoist motor rotor",
+        "measured": false,
+        "steps": -4.512723528193874e-10
+    },
+    "hoist_motor_damping_coefficient": {
+        "value": 0.15021947669314012,
+        "unit": "Ns.m/rad",
+        "description": "Damping coefficient of the hoist motor",
+        "measured": false,
+        "steps": -0.00022461588145006317
+    },
+    "hoist_motor_pulley_radius": {
+        "value": 0.015,
+        "unit": "m",
+        "description": "Radius of the pulley connected to the hoist motor",
+        "measured": true
+    },
+    "hoist_motor_torque_constant": {
+        "value": 0.0006107976221371031,
+        "unit": "Nm/A",
+        "description": "Torque constant of the hoist motor",
+        "measured": false,
+        "steps": 7.582245942217015e-07
+    },
+    "hoist_motor_back_emf_constant": {
+        "value": 0.42853579437505807,
+        "unit": "V/(rad/s)",
+        "description": "Back EMF constant of the hoist motor",
+        "measured": false,
+        "steps": 1.809663530139005e-08
+    }
+}

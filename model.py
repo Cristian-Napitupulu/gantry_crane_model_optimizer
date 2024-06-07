@@ -325,7 +325,7 @@ class Simulator:
             print("Setting initial conditions to default values...")
             self.l[0] = 1.0  # Cable length can never be zero
 
-    def simulate(self, parameters, inputs, initial_conditions):
+    def simulate(self, parameters, inputs, initial_conditions=None):
         self.set_variables(initial_conditions)
         self.set_parameters(parameters)
 
@@ -384,7 +384,7 @@ class Simulator:
             print(f"An error occurred: {e}")
             self.simulation_successful = False
 
-    def simulate_legacy(self,parameters, inputs, initial_conditions):
+    def simulate_legacy(self,parameters, inputs, initial_conditions=None):
         self.set_variables(initial_conditions)
         self.set_parameters(parameters)
         dt = self.dt
@@ -684,7 +684,7 @@ class Simulator:
         else:
             return None
 
-    def get_results_for_optimization(self):
+    def get_results(self):
         if self.simulation_successful:
             return [
                 np.arange(0, self.num_steps * self.dt, self.dt),

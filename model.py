@@ -1,8 +1,8 @@
 from numba import jit, float64
 import numpy as np
 import pandas as pd
-from tqdm import tqdm
 import warnings
+
 
 # Define the function with JIT compilation
 @jit(nopython=True)
@@ -146,10 +146,14 @@ def simulate_core(
             - f_2
         )
 
-        determinant = (a_1_1 * a_2_2 - a_1_2 * a_2_1)
+        determinant = a_1_1 * a_2_2 - a_1_2 * a_2_1
 
-        x_triple_dot = (a_2_2 * temp_x_triple_dot - a_1_2 * temp_l_triple_dot) * 1 / determinant
-        l_triple_dot = (a_1_1 * temp_l_triple_dot - a_2_1 * temp_x_triple_dot) * 1 / determinant
+        x_triple_dot = (
+            (a_2_2 * temp_x_triple_dot - a_1_2 * temp_l_triple_dot) * 1 / determinant
+        )
+        l_triple_dot = (
+            (a_1_1 * temp_l_triple_dot - a_2_1 * temp_x_triple_dot) * 1 / determinant
+        )
 
         # if control_now[0, 0] < bias_tm:
         #     q_triple_dot_now[0, 0] = 0
@@ -198,6 +202,7 @@ def simulate_core(
         Ul,
     )
 
+
 class Simulator:
     def __init__(self, dt, num_steps):
         self.simulation_successful = False
@@ -226,7 +231,6 @@ class Simulator:
         self.Kt_hm = 1e-3
         # self.bias_tm = 1e-3
         # self.bias_hm = 1e-3
-
 
         if parameters is not None:
             for parameter in parameters:
@@ -272,7 +276,9 @@ class Simulator:
                     self.b_tm = parameters["trolley_motor_damping_coefficient"]["value"]
 
                 if parameter == "trolley_motor_back_emf_constant":
-                    self.Kemf_tm = parameters["trolley_motor_back_emf_constant"]["value"]
+                    self.Kemf_tm = parameters["trolley_motor_back_emf_constant"][
+                        "value"
+                    ]
 
                 if parameter == "trolley_motor_torque_constant":
                     self.Kt_tm = parameters["trolley_motor_torque_constant"]["value"]
@@ -376,7 +382,7 @@ class Simulator:
                 self.b_tm,
                 self.b_hm,
                 self.g,
-                input_voltages, 
+                input_voltages,
                 variable_initial_conditions,
             )
 
@@ -384,7 +390,7 @@ class Simulator:
             print(f"An error occurred: {e}")
             self.simulation_successful = False
 
-    def simulate_legacy(self,parameters, inputs, initial_conditions=None):
+    def simulate_legacy(self, parameters, inputs, initial_conditions=None):
         self.set_variables(initial_conditions)
         self.set_parameters(parameters)
         dt = self.dt
@@ -403,7 +409,7 @@ class Simulator:
         self.matrix_F = np.matrix([[0.0], [0.0]])
 
         self.simulation_successful = True
-        for i in tqdm(range(self.num_steps - 1)):
+        for i in range(self.num_steps - 1):
             # print(f"Iteration: {i}", end="\r", flush=True)
             try:
                 with warnings.catch_warnings(record=True) as caught_warnings:
@@ -592,9 +598,7 @@ class Simulator:
                     )
 
                     # Create variable for control input
-                    control_now = np.matrix(
-                        [[self.Ux[i]], [self.Ul[i]]]
-                    )
+                    control_now = np.matrix([[self.Ux[i]], [self.Ul[i]]])
 
                     # Update self.x_dot_dot, self.l_dot_dot, self.theta_dot_dot using state space equations
                     q_triple_dot_now = np.matmul(
@@ -686,16 +690,17 @@ class Simulator:
 
     def get_results(self):
         if self.simulation_successful:
-            return [
-                np.arange(0, self.num_steps * self.dt, self.dt),
-                self.x,
-                self.l,
-                self.theta,
-                self.Ux,
-                self.Ul,
-            ]
+            data = {
+                "time": np.arange(0, self.num_steps * self.dt, self.dt),
+                "trolley_position": np.array(self.x),
+                "cable_length": np.array(self.l),
+                "sway_angle": np.array(self.theta),
+                "trolley_motor_voltage": np.array(self.Ux),
+                "hoist_motor_voltage": np.array(self.Ul),
+            }
+            return data
         else:
-            return []
+            return None
 
     def check_divergence(self):
         if (

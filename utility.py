@@ -12,9 +12,10 @@ def calculate_squared_errors(y1, y2):
     return squared_errors
 
 
+@jit(nopython=True)
 def calculate_sum_root_mean_squared_errors(interpolated_array_, simulated_array_):
     sum_root_mean_squared_errors = 0.0
-    for column in interpolated_array_.columns:
+    for column in range(len(interpolated_array_)):
         y1 = interpolated_array_[column]
         y2 = simulated_array_[column]
         n = len(y1)

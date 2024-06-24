@@ -28,6 +28,8 @@ def simulate_core(
     b_tm,
     b_hm,
     g,
+    bias_tm,
+    bias_hm,
     inputs,
     initial_conditions,
 ):
@@ -155,11 +157,11 @@ def simulate_core(
             (a_1_1 * temp_l_triple_dot - a_2_1 * temp_x_triple_dot) * 1 / determinant
         )
 
-        # if control_now[0, 0] < bias_tm:
-        #     q_triple_dot_now[0, 0] = 0
+        if (abs(Ux[i]) < bias_tm) and (abs(x_dot[i]) < 1e-6):
+            x_triple_dot = 0
 
-        # if control_now[1, 0] < bias_hm:
-        #     q_triple_dot_now[1, 0] = 0
+        if (abs(Ul[i]) < bias_hm) and (abs(l_dot[i]) < 1e-6):
+            l_triple_dot = 0
 
         x_dot_dot[i + 1] = x_dot_dot[i] + x_triple_dot * dt
 
@@ -229,8 +231,8 @@ class Simulator:
         self.Kemf_hm = 1e-3
         self.Kt_tm = 1e-3
         self.Kt_hm = 1e-3
-        # self.bias_tm = 1e-3
-        # self.bias_hm = 1e-3
+        self.bias_tm = 1e-3
+        self.bias_hm = 1e-3
 
         if parameters is not None:
             for parameter in parameters:
@@ -295,11 +297,11 @@ class Simulator:
                 if parameter == "hoist_motor_torque_constant":
                     self.Kt_hm = parameters["hoist_motor_torque_constant"]["value"]
 
-                # if parameter == 'trolley_motor_bias':
-                #     self.bias_tm = parameters["trolley_motor_bias"]["value"]
+                if parameter == 'trolley_motor_bias':
+                    self.bias_tm = parameters["trolley_motor_bias"]["value"]
 
-                # if parameter == 'hoist_motor_bias':
-                #     self.bias_hm = parameters["hoist_motor_bias"]["value"]
+                if parameter == 'hoist_motor_bias':
+                    self.bias_hm = parameters["hoist_motor_bias"]["value"]
 
         else:
             raise ValueError("Parameters are not provided")
@@ -382,6 +384,8 @@ class Simulator:
                 self.b_tm,
                 self.b_hm,
                 self.g,
+                self.bias_tm,
+                self.bias_hm,
                 input_voltages,
                 variable_initial_conditions,
             )
@@ -615,11 +619,11 @@ class Simulator:
                         ),
                     )
 
-                    # if control_now[0, 0] < self.bias_tm:
-                    #     q_triple_dot_now[0, 0] = 0
+                    if (control_now[0, 0] < self.bias_tm) and (abs(self.x_dot[i]) < 1e-6):
+                        q_triple_dot_now[0, 0] = 0
 
-                    # if control_now[1, 0] < self.bias_hm:
-                    #     q_triple_dot_now[1, 0] = 0
+                    if (control_now[1, 0] < self.bias_hm) and (abs(self.l_dot[i]) < 1e-6):
+                        q_triple_dot_now[1, 0] = 0
 
                     self.x_dot_dot[i + 1] = (
                         self.x_dot_dot[i] + q_triple_dot_now[0, 0] * dt

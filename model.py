@@ -126,8 +126,11 @@ def simulate_core(
 
         f_2 = -R_hm * g * m_c * rp_hm * np.cos(theta[i]) / Kt_hm
 
-        # Ux[i] = trolley_motor_voltage[i]
-        # Ul[i] = hoist_motor_voltage[i]
+        if (abs(Ux[i]) < bias_tm):
+            Ux[i] = 0
+
+        if (abs(Ul[i]) < bias_hm):
+            Ul[i] = -bias_hm
 
         temp_x_triple_dot = (
             Ux[i]
@@ -156,12 +159,6 @@ def simulate_core(
         l_triple_dot = (
             (a_1_1 * temp_l_triple_dot - a_2_1 * temp_x_triple_dot) * 1 / determinant
         )
-
-        if (abs(Ux[i]) < bias_tm):
-            x_triple_dot = 0
-
-        if (abs(Ul[i]) < bias_hm):
-            l_triple_dot = 0
 
         x_dot_dot[i + 1] = x_dot_dot[i] + x_triple_dot * dt
 

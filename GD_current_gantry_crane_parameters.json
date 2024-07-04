@@ -1,6 +1,6 @@
 {
     "trolley_mass": {
-        "value": 4.464237605386931,
+        "value": 4.464236472745942,
         "unit": "kg",
         "description": "Mass of the trolley",
         "measured": false
@@ -12,13 +12,13 @@
         "measured": true
     },
     "trolley_damping_coefficient": {
-        "value": 0.19840450679668326,
+        "value": 0.19840189136744255,
         "unit": "Ns/m",
         "description": "Damping coefficient of the trolley",
         "measured": false
     },
     "cable_damping_coefficient": {
-        "value": 2.732474480889145,
+        "value": 2.7324720362634474,
         "unit": "Ns/m",
         "description": "Damping coefficient of the cable",
         "measured": false
@@ -48,13 +48,13 @@
         "measured": true
     },
     "hoist_motor_rotator_inertia": {
-        "value": 0.2401934812890969,
+        "value": 0.3971192357313066,
         "unit": "kg.m^2",
         "description": "Rotational inertia of the hoist motor rotor",
         "measured": false
     },
     "hoist_motor_damping_coefficient": {
-        "value": 1.7846454460498087,
+        "value": 1.771549362003544,
         "unit": "Ns.m/rad",
         "description": "Damping coefficient of the hoist motor",
         "measured": false
@@ -66,13 +66,13 @@
         "measured": true
     },
     "hoist_motor_torque_constant": {
-        "value": 0.5721425556068347,
+        "value": 0.5919450912864469,
         "unit": "Nm/A",
         "description": "Torque constant of the hoist motor",
         "measured": false
     },
     "hoist_motor_back_emf_constant": {
-        "value": 0.5458413905385154,
+        "value": 0.5450140608807418,
         "unit": "V/(rad/s)",
         "description": "Back EMF constant of the hoist motor",
         "measured": false
@@ -96,13 +96,13 @@
         "measured": true
     },
     "trolley_motor_rotator_inertia": {
-        "value": 0.025630531337503613,
+        "value": 0.03619900051422385,
         "unit": "kg.m^2",
         "description": "Rotational inertia of the trolley motor rotor",
         "measured": false
     },
     "trolley_motor_damping_coefficient": {
-        "value": 8.88448099217621,
+        "value": 8.884444973979233,
         "unit": "Ns.m/rad",
         "description": "Damping coefficient of the trolley motor",
         "measured": false
@@ -114,13 +114,13 @@
         "measured": true
     },
     "trolley_motor_torque_constant": {
-        "value": 2.133620192257462,
+        "value": 2.1335574219556865,
         "unit": "Nm/A",
         "description": "Torque constant of the trolley motor",
         "measured": false
     },
     "trolley_motor_back_emf_constant": {
-        "value": 0.0025852703765080376,
+        "value": 0.004105421902533253,
         "unit": "V/(rad/s)",
         "description": "Back EMF constant of the trolley motor",
         "measured": false

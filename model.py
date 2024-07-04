@@ -157,10 +157,10 @@ def simulate_core(
             (a_1_1 * temp_l_triple_dot - a_2_1 * temp_x_triple_dot) * 1 / determinant
         )
 
-        if (abs(Ux[i]) < bias_tm) and (abs(x_dot[i]) < 1e-4) and (abs(x_dot_dot[i]) < 1e-4):
+        if (abs(Ux[i]) < bias_tm):
             x_triple_dot = 0
 
-        if (abs(Ul[i]) < bias_hm) and (abs(l_dot[i]) < 1e-4) and (abs(l_dot_dot[i]) < 1e-4):
+        if (abs(Ul[i]) < bias_hm):
             l_triple_dot = 0
 
         x_dot_dot[i + 1] = x_dot_dot[i] + x_triple_dot * dt

@@ -126,12 +126,6 @@ def simulate_core(
 
         f_2 = -R_hm * g * m_c * rp_hm * np.cos(theta[i]) / Kt_hm
 
-        if (abs(Ux[i]) < bias_tm):
-            Ux[i] = 0
-
-        if (abs(Ul[i]) < bias_hm):
-            Ul[i] = -bias_hm
-
         temp_x_triple_dot = (
             Ux[i]
             - b_1_1 * x_dot_dot[i]
@@ -159,6 +153,12 @@ def simulate_core(
         l_triple_dot = (
             (a_1_1 * temp_l_triple_dot - a_2_1 * temp_x_triple_dot) * 1 / determinant
         )
+
+        if (abs(Ux[i]) < bias_tm) and (abs(x_dot[i]) < 1e-6):
+            x_triple_dot = 0
+
+        if (abs(Ul[i]) < bias_hm) and (abs(l_dot[i]) < 1e-6):
+            l_triple_dot = 0
 
         x_dot_dot[i + 1] = x_dot_dot[i] + x_triple_dot * dt
 
@@ -294,10 +294,10 @@ class Simulator:
                 if parameter == "hoist_motor_torque_constant":
                     self.Kt_hm = parameters["hoist_motor_torque_constant"]["value"]
 
-                if parameter == 'trolley_motor_bias':
+                if parameter == "trolley_motor_bias":
                     self.bias_tm = parameters["trolley_motor_bias"]["value"]
 
-                if parameter == 'hoist_motor_bias':
+                if parameter == "hoist_motor_bias":
                     self.bias_hm = parameters["hoist_motor_bias"]["value"]
 
         else:
@@ -616,10 +616,14 @@ class Simulator:
                         ),
                     )
 
-                    if (control_now[0, 0] < self.bias_tm) and (abs(self.x_dot[i]) < 1e-6):
+                    if (control_now[0, 0] < self.bias_tm) and (
+                        abs(self.x_dot[i]) < 1e-6
+                    ):
                         q_triple_dot_now[0, 0] = 0
 
-                    if (control_now[1, 0] < self.bias_hm) and (abs(self.l_dot[i]) < 1e-6):
+                    if (control_now[1, 0] < self.bias_hm) and (
+                        abs(self.l_dot[i]) < 1e-6
+                    ):
                         q_triple_dot_now[1, 0] = 0
 
                     self.x_dot_dot[i + 1] = (

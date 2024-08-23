@@ -30,7 +30,10 @@ def simulate_core(
     g,
     bias_tm,
     bias_hm,
-    inputs,
+    supply_voltage,
+    max_pwm,
+    trolley_motor_input,
+    hoist_motor_input,
     initial_conditions,
 ):
     x = np.zeros(num_steps + 1)
@@ -42,19 +45,16 @@ def simulate_core(
     x_dot_dot = np.zeros(num_steps + 1)
     l_dot_dot = np.zeros(num_steps + 1)
     theta_dot_dot = np.zeros(num_steps + 1)
-    # Ux = np.zeros(num_steps + 1)
-    # Ul = np.zeros(num_steps + 1)
 
-    if inputs is not None:
-        # trolley_motor_voltage = inputs[0]
-        # hoist_motor_voltage = inputs[1]
-        Ux = inputs[0]
-        Ul = inputs[1]
+    Ux = trolley_motor_input * supply_voltage / max_pwm
+    Ul = hoist_motor_input * supply_voltage / max_pwm
 
     if initial_conditions is not None:
         x[0] = initial_conditions[0]
         l[0] = initial_conditions[1]
         theta[0] = initial_conditions[2]
+    else:
+        raise ValueError("Initial conditions are not provided")
 
     for i in range(num_steps):
         # print(i)
@@ -183,10 +183,6 @@ def simulate_core(
 
         theta[i + 1] = theta[i] + theta_dot[i + 1] * dt
 
-        # Ux[i + 1] = trolley_motor_voltage[i + 1]
-
-        # Ul[i + 1] = hoist_motor_voltage[i + 1]
-
     return (
         x,
         l,
@@ -230,6 +226,8 @@ class Simulator:
         self.Kt_hm = 1e-3
         self.bias_tm = 1e-3
         self.bias_hm = 1e-3
+        self.supply_voltage = 12
+        self.max_pwm = 1023
 
         if parameters is not None:
             for parameter in parameters:
@@ -314,6 +312,9 @@ class Simulator:
         self.theta = np.zeros(self.num_steps)
         self.theta_dot = np.zeros(self.num_steps)
         self.theta_dot_dot = np.zeros(self.num_steps)
+
+        self.PWMx = np.zeros(self.num_steps)
+        self.PWMl = np.zeros(self.num_steps)
         self.Ux = np.zeros(self.num_steps)
         self.Ul = np.zeros(self.num_steps)
 
@@ -330,18 +331,18 @@ class Simulator:
             print("Setting initial conditions to default values...")
             self.l[0] = 1.0  # Cable length can never be zero
 
-    def simulate(self, parameters, inputs, initial_conditions=None):
+    def simulate(
+        self,
+        parameters,
+        trolley_motor_input_PWM,
+        hoist_motor_input_PWM,
+        initial_conditions=None,
+    ):
         self.set_variables(initial_conditions)
         self.set_parameters(parameters)
 
-        if inputs is not None:
-            for input in inputs:
-                if input == "trolley_motor_voltage":
-                    self.Ux = inputs[input]
-                if input == "hoist_motor_voltage":
-                    self.Ul = inputs[input]
-
-        input_voltages = [self.Ux, self.Ul]
+        self.PWMx = trolley_motor_input_PWM
+        self.PWMl = hoist_motor_input_PWM
 
         variable_initial_conditions = [self.x[0], self.l[0], self.theta[0]]
 
@@ -383,7 +384,10 @@ class Simulator:
                 self.g,
                 self.bias_tm,
                 self.bias_hm,
-                input_voltages,
+                self.supply_voltage,
+                self.max_pwm,
+                trolley_motor_input_PWM,
+                hoist_motor_input_PWM,
                 variable_initial_conditions,
             )
 
@@ -673,7 +677,7 @@ class Simulator:
         if self.simulation_successful:
             print("Creating dataframe...")
             print(
-                f"Data length: {self.num_steps}, {len(self.x)}, {len(self.x_dot)}, {len(self.x_dot_dot)}, {len(self.l)}, {len(self.l_dot)}, {len(self.l_dot_dot)}, {len(self.theta)}, {len(self.theta_dot)}, {len(self.theta_dot_dot)}, {len(self.Ux)}, {len(self.Ul)}"
+                f"Data length: {self.num_steps}, {len(self.x)}, {len(self.x_dot)}, {len(self.x_dot_dot)}, {len(self.l)}, {len(self.l_dot)}, {len(self.l_dot_dot)}, {len(self.theta)}, {len(self.theta_dot)}, {len(self.theta_dot_dot)}, {len(self.PWMx)}, {len(self.PWMl)}, {len(self.Ux)}, {len(self.Ul)}"
             )
             data = {
                 "time": np.arange(0, self.num_steps * self.dt, self.dt),
@@ -686,6 +690,8 @@ class Simulator:
                 "sway_angle": self.theta,
                 "sway_angle_first_derivative": self.theta_dot,
                 "sway_angle_second_derivative": self.theta_dot_dot,
+                "trolley_motor_pwm": self.PWMx,
+                "hoist_motor_pwm": self.PWMl,
                 "trolley_motor_voltage": self.Ux,
                 "hoist_motor_voltage": self.Ul,
             }
@@ -700,12 +706,15 @@ class Simulator:
                 "trolley_position": np.array(self.x),
                 "cable_length": np.array(self.l),
                 "sway_angle": np.array(self.theta),
+                "trolley_motor_pwm": np.array(self.PWMx),
+                "hoist_motor_pwm": np.array(self.PWMl),
                 "trolley_motor_voltage": np.array(self.Ux),
                 "hoist_motor_voltage": np.array(self.Ul),
             }
             return data
         else:
-            return None
+            data = {}
+            return data
 
     def check_divergence(self):
         if (

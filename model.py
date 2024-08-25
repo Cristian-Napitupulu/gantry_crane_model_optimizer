@@ -154,10 +154,18 @@ def simulate_core(
             (a_1_1 * temp_l_triple_dot - a_2_1 * temp_x_triple_dot) * 1 / determinant
         )
 
-        if (abs(Ux[i]) < bias_tm) and (abs(x_dot[i]) < 1e-6):
+        if (
+            (abs(Ux[i]) < bias_tm)
+            and (abs(x_dot_dot[i]) < 1e-6)
+            and (abs(x_dot[i]) < 1e-6)
+        ):
             x_triple_dot = 0
 
-        if (abs(Ul[i]) < bias_hm) and (abs(l_dot[i]) < 1e-6):
+        if (
+            (abs(Ul[i]) < bias_hm)
+            and (abs(l_dot_dot[i]) < 1e-6)
+            and (abs(l_dot[i]) < 1e-6)
+        ):
             l_triple_dot = 0
 
         x_dot_dot[i + 1] = x_dot_dot[i] + x_triple_dot * dt
@@ -706,6 +714,8 @@ class Simulator:
                 "trolley_position": np.array(self.x),
                 "cable_length": np.array(self.l),
                 "sway_angle": np.array(self.theta),
+                "trolley_speed": np.array(self.x_dot),
+                "cable_speed": np.array(self.l_dot),
                 "trolley_motor_pwm": np.array(self.PWMx),
                 "hoist_motor_pwm": np.array(self.PWMl),
                 "trolley_motor_voltage": np.array(self.Ux),

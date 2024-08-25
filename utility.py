@@ -66,14 +66,14 @@ def save_json(data, directory):
         json.dump(data, file, indent=4)
 
 
-def add_to_subplot(axis, x, y, xlabel=None, ylabel=None, color="blue"):
-    plt.rcParams.update({"font.size": 14})
+def add_to_subplot(axis, x, y, xlabel=None, ylabel=None, color="blue", linestyle="-"):
     axis.scatter(0, 0, alpha=0)
     axis.plot(
         x,
         y,
         color=color,
         label=ylabel,
+        linestyle=linestyle,
     )
     axis.minorticks_on()
     axis.legend()
@@ -93,12 +93,13 @@ def calculate_squared_errors(y1, y2):
 def calculate_sum_root_mean_squared_errors(interpolated_array_, simulated_array_):
     sum_root_mean_squared_errors = 0.0
     for column in range(len(interpolated_array_)):
-        y1 = interpolated_array_[column]
-        y2 = simulated_array_[column]
-        n = len(y1)
-        sum_squared_error = 0.0
-        for j in range(n):
-            sum_squared_error += (y1[j] - y2[j]) ** 2
-        root_mean_squared_errors = np.sqrt(sum_squared_error / n)
-        sum_root_mean_squared_errors += root_mean_squared_errors
+        if column <= 4:
+            y1 = interpolated_array_[column]
+            y2 = simulated_array_[column]
+            n = len(y1)
+            sum_squared_error = 0.0
+            for j in range(n):
+                sum_squared_error += (y1[j] - y2[j]) ** 2
+            root_mean_squared_errors = np.sqrt(sum_squared_error / n)
+            sum_root_mean_squared_errors += root_mean_squared_errors
     return sum_root_mean_squared_errors

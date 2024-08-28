@@ -309,6 +309,42 @@ class Simulator:
         else:
             raise ValueError("Parameters are not provided")
 
+    def set_sliding_mode_parameters(self, parameters):
+        self.alpha1 = 1e-3
+        self.alpha2 = 1e-3
+        self.beta1 = 1e-3
+        self.beta2 = 1e-3
+        self.lambda1 = 1e-3
+        self.lambda2 = 1e-3
+        self.k1 = 1e-3
+        self.k2 = 1e-3
+
+        if parameters is not None:
+            for parameter in parameters:
+                if parameter == "alpha1":
+                    self.alpha1 = parameters["alpha1"]["value"]
+
+                if parameter == "alpha2":
+                    self.alpha2 = parameters["alpha2"]["value"]
+
+                if parameter == "beta1":
+                    self.beta1 = parameters["beta1"]["value"]
+
+                if parameter == "beta2":
+                    self.beta2 = parameters["beta2"]["value"]
+
+                if parameter == "lambda1":
+                    self.lambda1 = parameters["lambda1"]["value"]
+
+                if parameter == "lambda2":
+                    self.lambda2 = parameters["lambda2"]["value"]
+
+                if parameter == "k1":
+                    self.k1 = parameters["k1"]["value"]
+
+                if parameter == "k2":
+                    self.k2 = parameters["k2"]["value"]
+    
     def set_variables(self, initial_conditions):
         # Initial conditions
         self.x = np.zeros(self.num_steps)

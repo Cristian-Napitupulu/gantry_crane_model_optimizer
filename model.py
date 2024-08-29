@@ -357,7 +357,7 @@ def simulate_core_with_SMC(
             + lambda2 * theta[i]
         )
 
-        Ux[i+1] = (
+        Ux[i + 1] = (
             (b_1_1 - a_1_1 * beta1) * x_dot_dot[i]
             + (b_1_2 - a_1_2 * beta2) * l_dot_dot[i]
             + (c_1_1 - a_1_1 * alpha1) * x_dot[i]
@@ -368,7 +368,7 @@ def simulate_core_with_SMC(
             - k1 * np.sign(s1)
         )
 
-        Ul[i+1] = (
+        Ul[i + 1] = (
             (b_2_1 - a_2_1 * beta1) * x_dot_dot[i]
             + (b_2_2 - a_2_2 * beta2) * l_dot_dot[i]
             - a_2_1 * alpha1 * x_dot[i]
@@ -379,21 +379,21 @@ def simulate_core_with_SMC(
             - k2 * np.sign(s2)
         )
 
-        if Ux[i+1] > supply_voltage:
-            Ux[i+1] = supply_voltage
-        if Ux[i+1] < -supply_voltage:
-            Ux[i+1] = -supply_voltage
+        if Ux[i + 1] > supply_voltage:
+            Ux[i + 1] = supply_voltage
+        if Ux[i + 1] < -supply_voltage:
+            Ux[i + 1] = -supply_voltage
 
-        if Ul[i+1] > supply_voltage:
-            Ul[i+1] = supply_voltage
-        if Ul[i+1] < -supply_voltage:
-            Ul[i+1] = -supply_voltage
+        if Ul[i + 1] > supply_voltage:
+            Ul[i + 1] = supply_voltage
+        if Ul[i + 1] < -supply_voltage:
+            Ul[i + 1] = -supply_voltage
 
-        PWMx[i+1] = int(Ux[i+1] * max_pwm / supply_voltage)
-        PWMl[i+1] = int(Ul[i+1] * max_pwm / supply_voltage)
+        PWMx[i + 1] = int(Ux[i + 1] * max_pwm / supply_voltage)
+        PWMl[i + 1] = int(Ul[i + 1] * max_pwm / supply_voltage)
 
         temp_x_triple_dot = (
-            Ux[i+1]
+            Ux[i + 1]
             - b_1_1 * x_dot_dot[i]
             - b_1_2 * l_dot_dot[i]
             - c_1_1 * x_dot[i]
@@ -402,7 +402,7 @@ def simulate_core_with_SMC(
             - f_1
         )
         temp_l_triple_dot = (
-            Ul[i+1]
+            Ul[i + 1]
             - b_2_1 * x_dot_dot[i]
             - b_2_2 * l_dot_dot[i]
             - c_2_2 * l_dot[i]
@@ -421,14 +421,14 @@ def simulate_core_with_SMC(
         )
 
         if (
-            (abs(Ux[i+1]) < bias_tm)
+            (abs(Ux[i + 1]) < bias_tm)
             and (abs(x_dot_dot[i]) < 1e-6)
             and (abs(x_dot[i]) < 1e-6)
         ):
             x_triple_dot = 0
 
         if (
-            (abs(Ul[i+1]) < bias_hm)
+            (abs(Ul[i + 1]) < bias_hm)
             and (abs(l_dot_dot[i]) < 1e-6)
             and (abs(l_dot[i]) < 1e-6)
         ):
@@ -1077,9 +1077,9 @@ class Simulator:
                 "cable_length": self.l,
                 "cable_length_first_derivative": self.l_dot,
                 "cable_length_second_derivative": self.l_dot_dot,
-                "sway_angle": np.rad2deg(self.theta),
-                "sway_angle_first_derivative": np.rad2deg(self.theta_dot),
-                "sway_angle_second_derivative": np.rad2deg(self.theta_dot_dot),
+                "sway_angle": self.theta,
+                "sway_angle_first_derivative": self.theta_dot,
+                "sway_angle_second_derivative": self.theta_dot_dot,
                 "trolley_motor_pwm": self.PWMx,
                 "hoist_motor_pwm": self.PWMl,
                 "trolley_motor_voltage": self.Ux,
@@ -1095,7 +1095,7 @@ class Simulator:
                 "time": np.arange(0, self.num_steps * self.dt, self.dt),
                 "trolley_position": np.array(self.x),
                 "cable_length": np.array(self.l),
-                "sway_angle": np.array(np.rad2deg(self.theta)),
+                "sway_angle": np.array(self.theta),
                 "trolley_speed": np.array(self.x_dot),
                 "cable_speed": np.array(self.l_dot),
                 "trolley_motor_pwm": np.array(self.PWMx),

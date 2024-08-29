@@ -206,6 +206,275 @@ def simulate_core(
     )
 
 
+# Define the function with JIT compilation
+@jit(nopython=True)
+def simulate_core_with_SMC(
+    num_steps,
+    dt,
+    L_tm,
+    L_hm,
+    rp_tm,
+    rp_hm,
+    m_t,
+    m_c,
+    J_tm,
+    J_hm,
+    Kt_tm,
+    Kt_hm,
+    Kemf_tm,
+    Kemf_hm,
+    R_tm,
+    R_hm,
+    b_t,
+    b_c,
+    b_tm,
+    b_hm,
+    g,
+    bias_tm,
+    bias_hm,
+    supply_voltage,
+    max_pwm,
+    initial_conditions,
+    setpoints,
+    alpha1,
+    alpha2,
+    beta1,
+    beta2,
+    lambda1,
+    lambda2,
+    k1,
+    k2,
+):
+    time = np.zeros(num_steps + 1)
+    x = np.zeros(num_steps + 1)
+    l = np.zeros(num_steps + 1)
+    theta = np.zeros(num_steps + 1)
+    x_dot = np.zeros(num_steps + 1)
+    l_dot = np.zeros(num_steps + 1)
+    theta_dot = np.zeros(num_steps + 1)
+    x_dot_dot = np.zeros(num_steps + 1)
+    l_dot_dot = np.zeros(num_steps + 1)
+    theta_dot_dot = np.zeros(num_steps + 1)
+    Ux = np.zeros(num_steps + 1)
+    Ul = np.zeros(num_steps + 1)
+    PWMx = np.zeros(num_steps + 1)
+    PWMl = np.zeros(num_steps + 1)
+
+    if initial_conditions is not None:
+        x[0] = initial_conditions[0]
+        l[0] = initial_conditions[1]
+        theta[0] = initial_conditions[2]
+    else:
+        raise ValueError("Initial conditions are not provided")
+
+    if setpoints is not None:
+        x_setpoint = setpoints[0]
+        l_setpoint = setpoints[1]
+    else:
+        raise ValueError("Setpoints are not provided")
+
+    for i in range(num_steps):
+        time[i + 1] = time[i] + dt
+
+        # Update matrix A
+        a_1_1 = L_tm * rp_tm * (
+            m_t + m_c * np.sin(theta[i]) ** 2
+        ) / Kt_tm + J_tm * L_tm / (Kt_tm * rp_tm)
+
+        a_1_2 = -L_tm * m_c * rp_tm * np.sin(theta[i]) / Kt_tm
+
+        a_2_1 = -L_hm * m_c * rp_hm * np.sin(theta[i]) / Kt_hm
+        a_2_2 = L_hm * m_c * rp_hm / Kt_hm + J_hm * L_hm / (Kt_hm * rp_hm)
+
+        # Update matrix B
+        b_1_1 = (
+            +L_tm * m_c * rp_tm * np.sin(2 * theta[i]) * theta_dot[i] / Kt_tm
+            + R_tm * rp_tm * (m_t + m_c * np.sin(theta[i]) ** 2) / Kt_tm
+            + L_tm * b_t * rp_tm / Kt_tm
+            + J_tm * R_tm / (Kt_tm * rp_tm)
+            + L_tm * b_tm / (Kt_tm * rp_tm)
+        )
+
+        b_1_2 = (
+            -L_tm * m_c * rp_tm * np.cos(theta[i]) * theta_dot[i] / Kt_tm
+            - R_tm * m_c * rp_tm * np.sin(theta[i]) / Kt_tm
+        )
+
+        b_2_1 = (
+            -L_hm * m_c * rp_hm * np.cos(theta[i]) * theta_dot[i] / Kt_hm
+            - R_hm * m_c * rp_hm * np.sin(theta[i]) / Kt_hm
+        )
+
+        b_2_2 = (
+            +L_hm * b_c * rp_hm / Kt_hm
+            + R_hm * m_c * rp_hm / Kt_hm
+            + J_hm * R_hm / (Kt_hm * rp_hm)
+            + L_hm * b_hm / (Kt_hm * rp_hm)
+        )
+
+        # Update matrix C
+        c_1_1 = (
+            R_tm * b_t * rp_tm / Kt_tm + Kemf_tm / rp_tm + R_tm * b_tm / (Kt_tm * rp_tm)
+        )
+
+        c_2_2 = (
+            R_hm * b_c * rp_hm / Kt_hm + Kemf_hm / rp_hm + R_hm * b_hm / (Kt_hm * rp_hm)
+        )
+
+        # Update matrix D
+        d_1 = 2 * L_tm * m_c * rp_tm * l[i] * np.sin(theta[i]) * theta_dot[i] / Kt_tm
+        d_2 = -2 * L_hm * m_c * rp_hm * l[i] * theta_dot[i] / Kt_hm
+
+        # Update matrix E
+        e_1 = (
+            L_tm * m_c * rp_tm * l[i] * np.cos(theta[i]) * theta_dot[i] ** 2 / Kt_tm
+            + L_tm * g * m_c * rp_tm * np.cos(2 * theta[i]) / Kt_tm
+            + L_tm * m_c * rp_tm * np.sin(theta[i]) * l_dot[i] * theta_dot[i] / Kt_tm
+            + R_tm * m_c * rp_tm * l[i] * np.sin(theta[i]) * theta_dot[i] / Kt_tm
+        )
+
+        e_2 = (
+            +L_hm * g * m_c * rp_hm * np.sin(theta[i]) / Kt_hm
+            - L_hm * m_c * rp_hm * l_dot[i] * theta_dot[i] / Kt_hm
+            - R_hm * m_c * rp_hm * l[i] * theta_dot[i] / Kt_hm
+        )
+
+        # Update matrix F
+        f_1 = R_tm * g * m_c * rp_tm * np.sin(theta[i]) * np.cos(theta[i]) / Kt_tm
+
+        f_2 = -R_hm * g * m_c * rp_hm * np.cos(theta[i]) / Kt_hm
+
+        s1 = (
+            alpha1 * (x[i] - x_setpoint)
+            + beta1 * x_dot[i]
+            + x_dot_dot[i]
+            + lambda1 * theta[i]
+        )
+        s2 = (
+            alpha2 * (l[i] - l_setpoint)
+            + beta2 * l_dot[i]
+            + l_dot_dot[i]
+            + lambda2 * theta[i]
+        )
+
+        Ux[i] = (
+            (b_1_1 - a_1_1 * beta1) * x_dot_dot[i]
+            + (b_1_2 - a_1_2 * beta2) * l_dot_dot[i]
+            + (c_1_1 - a_1_1 * alpha1) * x_dot[i]
+            - a_1_2 * alpha2 * l_dot[i]
+            + d_1 * theta_dot_dot[i]
+            + (e_1 - a_1_1 * lambda1 - a_1_2 * lambda2) * theta_dot[i]
+            + f_1
+            - k1 * np.sign(s1)
+        )
+
+        Ul[i] = (
+            (b_2_1 - a_2_1 * beta1) * x_dot_dot[i]
+            + (b_2_2 - a_2_2 * beta2) * l_dot_dot[i]
+            - a_2_1 * alpha1 * x_dot[i]
+            + (c_2_2 - a_2_2 * alpha2) * l_dot[i]
+            + d_2 * theta_dot_dot[i]
+            + (e_2 - a_2_1 * lambda1 - a_2_2 * lambda2) * theta_dot[i]
+            + f_2
+            - k2 * np.sign(s2)
+        )
+
+        if Ux[i] > supply_voltage:
+            Ux[i] = supply_voltage
+        if Ux[i] < -supply_voltage:
+            Ux[i] = -supply_voltage
+
+        if Ul[i] > supply_voltage:
+            Ul[i] = supply_voltage
+        if Ul[i] < -supply_voltage:
+            Ul[i] = -supply_voltage
+
+        PWMx[i] = int(Ux[i] * max_pwm / supply_voltage)
+        PWMl[i] = int(Ul[i] * max_pwm / supply_voltage)
+
+        temp_x_triple_dot = (
+            Ux[i]
+            - b_1_1 * x_dot_dot[i]
+            - b_1_2 * l_dot_dot[i]
+            - c_1_1 * x_dot[i]
+            - d_1 * theta_dot_dot[i]
+            - e_1 * theta_dot[i]
+            - f_1
+        )
+        temp_l_triple_dot = (
+            Ul[i]
+            - b_2_1 * x_dot_dot[i]
+            - b_2_2 * l_dot_dot[i]
+            - c_2_2 * l_dot[i]
+            - d_2 * theta_dot_dot[i]
+            - e_2 * theta_dot[i]
+            - f_2
+        )
+
+        determinant = a_1_1 * a_2_2 - a_1_2 * a_2_1
+
+        x_triple_dot = (
+            (a_2_2 * temp_x_triple_dot - a_1_2 * temp_l_triple_dot) * 1 / determinant
+        )
+        l_triple_dot = (
+            (a_1_1 * temp_l_triple_dot - a_2_1 * temp_x_triple_dot) * 1 / determinant
+        )
+
+        if (
+            (abs(Ux[i]) < bias_tm)
+            and (abs(x_dot_dot[i]) < 1e-6)
+            and (abs(x_dot[i]) < 1e-6)
+        ):
+            x_triple_dot = 0
+
+        if (
+            (abs(Ul[i]) < bias_hm)
+            and (abs(l_dot_dot[i]) < 1e-6)
+            and (abs(l_dot[i]) < 1e-6)
+        ):
+            l_triple_dot = 0
+
+        x_dot_dot[i + 1] = x_dot_dot[i] + x_triple_dot * dt
+
+        l_dot_dot[i + 1] = l_dot_dot[i] + l_triple_dot * dt
+
+        theta_dot_dot_temp_ = (
+            np.cos(theta[i]) * x_dot_dot[i]
+            - 2 * l_dot[i] * theta_dot[i]
+            - np.sin(theta[i]) * g
+        ) / l[i]
+        theta_dot_dot[i + 1] = theta_dot_dot_temp_
+
+        x_dot[i + 1] = x_dot[i] + x_dot_dot[i + 1] * dt
+
+        l_dot[i + 1] = l_dot[i] + l_dot_dot[i + 1] * dt
+
+        theta_dot[i + 1] = theta_dot[i] + theta_dot_dot[i + 1] * dt
+
+        x[i + 1] = x[i] + x_dot[i + 1] * dt
+
+        l[i + 1] = l[i] + l_dot[i + 1] * dt
+
+        theta[i + 1] = theta[i] + theta_dot[i + 1] * dt
+
+    return (
+        time,
+        x,
+        l,
+        theta,
+        x_dot,
+        l_dot,
+        theta_dot,
+        x_dot_dot,
+        l_dot_dot,
+        theta_dot_dot,
+        Ux,
+        Ul,
+        PWMx,
+        PWMl,
+    )
+
+
 class Simulator:
     def __init__(self, dt, num_steps):
         self.simulation_successful = False
@@ -300,11 +569,15 @@ class Simulator:
                 if parameter == "hoist_motor_torque_constant":
                     self.Kt_hm = parameters["hoist_motor_torque_constant"]["value"]
 
-                if parameter == "trolley_motor_bias":
-                    self.bias_tm = parameters["trolley_motor_bias"]["value"]
+                if parameter == "trolley_motor_activation_threshold_voltage":
+                    self.bias_tm = parameters[
+                        "trolley_motor_activation_threshold_voltage"
+                    ]["value"]
 
-                if parameter == "hoist_motor_bias":
-                    self.bias_hm = parameters["hoist_motor_bias"]["value"]
+                if parameter == "hoist_motor_activation_threshold_voltage":
+                    self.bias_hm = parameters[
+                        "hoist_motor_activation_threshold_voltage"
+                    ]["value"]
 
         else:
             raise ValueError("Parameters are not provided")
@@ -344,9 +617,10 @@ class Simulator:
 
                 if parameter == "k2":
                     self.k2 = parameters["k2"]["value"]
-    
+
     def set_variables(self, initial_conditions):
         # Initial conditions
+        self.time = np.linspace(0, self.num_steps * self.dt, self.num_steps)
         self.x = np.zeros(self.num_steps)
         self.x_dot = np.zeros(self.num_steps)
         self.x_dot_dot = np.zeros(self.num_steps)
@@ -433,6 +707,78 @@ class Simulator:
                 trolley_motor_input_PWM,
                 hoist_motor_input_PWM,
                 variable_initial_conditions,
+            )
+
+        except Exception as e:
+            print(f"An error occurred: {e}")
+            self.simulation_successful = False
+
+    def simulate_with_SMC(
+        self,
+        model_parameters,
+        sliding_mode_parameters,
+        setpoints,
+        initial_conditions=None,
+    ):
+        self.set_variables(initial_conditions)
+        self.set_parameters(model_parameters)
+        self.set_sliding_mode_parameters(sliding_mode_parameters)
+
+        variable_initial_conditions = [self.x[0], self.l[0], self.theta[0]]
+
+        self.simulation_successful = True
+        try:
+            (
+                self.time,
+                self.x,
+                self.l,
+                self.theta,
+                self.x_dot,
+                self.l_dot,
+                self.theta_dot,
+                self.x_dot_dot,
+                self.l_dot_dot,
+                self.theta_dot_dot,
+                self.Ux,
+                self.Ul,
+                self.PWMx,
+                self.PWMl,
+            ) = simulate_core_with_SMC(
+                self.num_steps - 1,
+                self.dt,
+                self.L_tm,
+                self.L_hm,
+                self.rp_tm,
+                self.rp_hm,
+                self.m_t,
+                self.m_c,
+                self.J_tm,
+                self.J_hm,
+                self.Kt_tm,
+                self.Kt_hm,
+                self.Kemf_tm,
+                self.Kemf_hm,
+                self.R_tm,
+                self.R_hm,
+                self.b_t,
+                self.b_c,
+                self.b_tm,
+                self.b_hm,
+                self.g,
+                self.bias_tm,
+                self.bias_hm,
+                self.supply_voltage,
+                self.max_pwm,
+                variable_initial_conditions,
+                setpoints,
+                self.alpha1,
+                self.alpha2,
+                self.beta1,
+                self.beta2,
+                self.lambda1,
+                self.lambda2,
+                self.k1,
+                self.k2,
             )
 
         except Exception as e:

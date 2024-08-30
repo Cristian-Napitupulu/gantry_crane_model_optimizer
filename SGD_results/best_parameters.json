@@ -1,60 +1,60 @@
 {
     "trolley_motor_torque_constant": {
-        "value": 8.056276431093337,
+        "value": 7.463571054632546,
         "unit": "Nm/A",
         "description": "Torque constant of the trolley motor",
         "measured": false
     },
     "trolley_motor_back_emf_constant": {
-        "value": 0.001,
+        "value": 0.08555546221207364,
         "unit": "V/(rad/s)",
         "description": "Back EMF constant of the trolley motor",
         "measured": false
     },
     "trolley_motor_rotator_inertia": {
-        "value": 3.312213607622991,
+        "value": 2.8732865826336944,
         "unit": "kg.m^2",
         "description": "Rotational inertia of the trolley motor rotor",
         "measured": false
     },
     "trolley_motor_damping_coefficient": {
-        "value": 3.8739395936149585,
+        "value": 2.5934410607119536,
         "unit": "Ns.m/rad",
         "description": "Damping coefficient of the trolley motor",
         "measured": false
     },
     "trolley_damping_coefficient": {
-        "value": 7.087912756204186,
+        "value": 8.412033401078,
         "unit": "Ns/m",
         "description": "Damping coefficient of the trolley",
         "measured": false
     },
     "hoist_motor_back_emf_constant": {
-        "value": 0.3085823912036303,
+        "value": 0.30347058156522044,
         "unit": "V/(rad/s)",
         "description": "Back EMF constant of the hoist motor",
         "measured": false
     },
     "hoist_motor_rotator_inertia": {
-        "value": 0.1901719839009484,
+        "value": 0.19085683140898405,
         "unit": "kg.m^2",
         "description": "Rotational inertia of the hoist motor rotor",
         "measured": false
     },
     "hoist_motor_torque_constant": {
-        "value": 9.983509005022484,
+        "value": 9.983901092090651,
         "unit": "Nm/A",
         "description": "Torque constant of the hoist motor",
         "measured": false
     },
     "hoist_motor_damping_coefficient": {
-        "value": 0.010931789992194081,
+        "value": 0.006122953520118092,
         "unit": "Ns.m/rad",
         "description": "Damping coefficient of the hoist motor",
         "measured": false
     },
     "cable_damping_coefficient": {
-        "value": 0.0010007032651665794,
+        "value": 0.0010004293680211055,
         "unit": "Ns/m",
         "description": "Damping coefficient of the cable",
         "measured": false

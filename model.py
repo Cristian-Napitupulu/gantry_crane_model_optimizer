@@ -4,6 +4,16 @@ import pandas as pd
 import warnings
 
 
+@jit(nopython=True)
+def saturation(sliding_surface, boundary_thickness):
+    if sliding_surface / boundary_thickness > 1:
+        return 1
+    elif sliding_surface / boundary_thickness < -1:
+        return -1
+    else:
+        return sliding_surface / boundary_thickness
+
+
 # Define the function with JIT compilation
 @jit(nopython=True)
 def simulate_core(
@@ -365,7 +375,8 @@ def simulate_core_with_SMC(
             + d_1 * theta_dot_dot[i]
             + (e_1 - a_1_1 * lambda1 - a_1_2 * lambda2) * theta_dot[i]
             + f_1
-            - k1 * np.sign(s1)
+            - k1 * saturation(s1, 0.01)
+            # - k1 * np.sign(s1)
         )
 
         Ul[i + 1] = (
@@ -376,7 +387,8 @@ def simulate_core_with_SMC(
             + d_2 * theta_dot_dot[i]
             + (e_2 - a_2_1 * lambda1 - a_2_2 * lambda2) * theta_dot[i]
             + f_2
-            - k2 * np.sign(s2)
+            - k2 * saturation(s2, 0.01)
+            # - k2 * np.sign(s2)
         )
 
         if Ux[i + 1] > supply_voltage:
@@ -726,6 +738,9 @@ class Simulator:
 
         variable_initial_conditions = [self.x[0], self.l[0], self.theta[0]]
 
+        control_setpoints = [setpoints["x"], setpoints["l"]]
+
+
         self.simulation_successful = True
         try:
             (
@@ -770,7 +785,7 @@ class Simulator:
                 self.supply_voltage,
                 self.max_pwm,
                 variable_initial_conditions,
-                setpoints,
+                control_setpoints,
                 self.alpha1,
                 self.alpha2,
                 self.beta1,

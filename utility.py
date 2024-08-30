@@ -66,7 +66,9 @@ def save_json(data, directory):
         json.dump(data, file, indent=4)
 
 
-def add_to_subplot(axis, x, y, xlabel=None, ylabel=None, color="blue", linestyle="-"):
+def add_to_subplot(
+    axis, x, y, xlabel=None, ylabel=None, color=plt.get_cmap("tab20")(0), linestyle="-"
+):
     axis.scatter(0, 0, alpha=0)
     axis.plot(
         x,

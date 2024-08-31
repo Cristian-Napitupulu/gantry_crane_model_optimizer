@@ -375,7 +375,7 @@ def simulate_core_with_SMC(
             + d_1 * theta_dot_dot[i]
             + (e_1 - a_1_1 * lambda1 - a_1_2 * lambda2) * theta_dot[i]
             + f_1
-            - k1 * saturation(s1, 0.01)
+            - k1 * saturation(s1, 0.05)
             # - k1 * np.sign(s1)
         )
 
@@ -387,7 +387,7 @@ def simulate_core_with_SMC(
             + d_2 * theta_dot_dot[i]
             + (e_2 - a_2_1 * lambda1 - a_2_2 * lambda2) * theta_dot[i]
             + f_2
-            - k2 * saturation(s2, 0.01)
+            - k2 * saturation(s2, 0.05)
             # - k2 * np.sign(s2)
         )
 

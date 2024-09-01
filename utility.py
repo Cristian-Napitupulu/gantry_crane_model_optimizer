@@ -105,3 +105,90 @@ def calculate_sum_root_mean_squared_errors(interpolated_array_, simulated_array_
             root_mean_squared_errors = np.sqrt(sum_squared_error / n)
             sum_root_mean_squared_errors += root_mean_squared_errors
     return sum_root_mean_squared_errors
+
+
+@jit(nopython=True)
+def get_rise_index(time_series, setpoint):
+    time_series = np.array(time_series)
+
+    if time_series[0] > setpoint:
+        time_series = -time_series
+        setpoint = -setpoint
+
+    # Cari nilai awal dari time series
+    start_value = time_series[0]
+    # Hitung 10% dan 90% dari nilai maksimum
+    threshold_10 = start_value + 0.1 * np.abs(setpoint - start_value)
+    threshold_90 = start_value + 0.9 * np.abs(setpoint - start_value)
+
+    # Cari index ketika time series memiliki nilai terdekat dengan 10% dan 90% threshold
+    rise_10_index = len(time_series) - 1
+    for i in range(len(time_series)):
+        if time_series[i] > threshold_10:
+            rise_10_index = i
+            break
+
+    rise_90_index = len(time_series) - 1
+    for i in range(len(time_series)):
+        if time_series[i] > threshold_90:
+            rise_90_index = i
+            break
+
+    return rise_10_index, rise_90_index
+
+
+@jit(nopython=True)
+def get_settling_index(time_series, setpoint, threshold=0.02):
+    time_series = np.array(time_series)
+
+    # Toleransi terhadap steady state
+    bound = np.abs(setpoint - time_series[0]) * np.abs(threshold)
+    if setpoint == 0:
+        bound = threshold
+
+    lower_bound = setpoint - bound
+    upper_bound = setpoint + bound
+
+    # Cari waktu ketika time series pertama kali melewati threshold 2%
+    settling_index = len(time_series) - 1  # Nilai default jika tidak ditemukan
+    for i in range(len(time_series) - 1, 0, -1):
+        if time_series[i] < lower_bound or time_series[i] > upper_bound:
+            settling_index = i
+            break
+
+    return settling_index
+
+
+@jit(nopython=True)
+def get_overshoot_index(time_series, setpoint):
+    time_series = np.array(time_series)
+
+    if time_series[0] > setpoint:
+        time_series = -time_series
+        setpoint = -setpoint
+
+    # Cari index ketika time series pertama kali melewati setpoint
+    pass_index = len(time_series)  # Nilai default jika tidak ditemukan
+    for i in range(len(time_series)):
+        if time_series[i] > setpoint:
+            pass_index = i
+            break
+
+    # Jika time series tidak pernah melewati setpoint
+    if pass_index == len(time_series):
+        return pass_index
+
+    # Cari index ketika time series mencapai nilai maksimum
+    overshoot_index = np.argmax(time_series[pass_index:]) + pass_index
+
+    return overshoot_index
+
+
+@jit(nopython=True)
+def get_RMSE_settle(settled_time_series, setpoint):
+    time_series = np.array(settled_time_series)
+
+    # Hitung RMSE terhadap setpoint
+    RMSE = np.sqrt(np.mean((time_series - setpoint) ** 2))
+
+    return RMSE

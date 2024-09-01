@@ -1,0 +1,50 @@
+{
+    "alpha1": {
+        "value": 9.991771865656693,
+        "unit": "1/s",
+        "description": "Sliding mode controller parameter",
+        "measured": false
+    },
+    "alpha2": {
+        "value": 10.0,
+        "unit": "1/s",
+        "description": "Sliding mode controller parameter",
+        "measured": false
+    },
+    "beta1": {
+        "value": 6.948992755176131,
+        "unit": "1/s",
+        "description": "Sliding mode controller parameter",
+        "measured": false
+    },
+    "beta2": {
+        "value": 4.96335651465302,
+        "unit": "1/s",
+        "description": "Sliding mode controller parameter",
+        "measured": false
+    },
+    "lambda1": {
+        "value": 10.0,
+        "unit": "1/s",
+        "description": "Sliding mode controller parameter",
+        "measured": false
+    },
+    "lambda2": {
+        "value": 0.10382971167011029,
+        "unit": "1/s",
+        "description": "Sliding mode controller parameter",
+        "measured": false
+    },
+    "k1": {
+        "value": 9.761173851303303,
+        "unit": "1/s",
+        "description": "Sliding mode controller parameter",
+        "measured": false
+    },
+    "k2": {
+        "value": 10.0,
+        "unit": "1/s",
+        "description": "Sliding mode controller parameter",
+        "measured": false
+    }
+}
